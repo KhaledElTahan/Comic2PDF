@@ -10,9 +10,12 @@
 # License:  You can do what you want with it.
 # Mainly based on a script by Bransorem (https://github.com/bransorem/comic2pdf) 
 
-import os, sys, zipfile, patoolib
+import os, sys, zipfile, patoolib, stat
 from PIL import Image
 import PIL.ExifTags
+import uuid
+import time
+
 failed = False
 
 def nlog_info (msg, out=open("comic2pdf_log.txt","a")):
@@ -24,7 +27,7 @@ def olog_info (msg, out=sys.stdout):
     print("patool:", msg, file=out)
 
 def handlerar2(filein, directory):
-	tmp_dir = directory+"\\Teemp\\"
+	tmp_dir = directory+"\\" + "TEMP2PDF" + str(uuid.uuid4()) + "\\"
 	os.mkdir(tmp_dir)
 	original = sys.stdout
 	sys.stdout = open("comic2pdf_log.txt","a")
@@ -40,7 +43,7 @@ def handlerar2(filein, directory):
 
 def handlezip(filein, directory):
 	zip_ref = zipfile.ZipFile(filein, 'r')
-	tmp_dir = directory+"\\Teemp\\"
+	tmp_dir = directory+"\\" + "TEMP2PDF" + str(uuid.uuid4()) + "\\"
 	zip_ref.extractall(tmp_dir)
 	zip_ref.close()
 	newfile = filein.replace(filein[-4:],".pdf")
@@ -79,12 +82,20 @@ def toPDF2(filename, newdir,ii):
 	#print("OK")
 
 def cleanDir(dir):
+	directories = [x[0] for x in os.walk(dir)][1:]
+	for directory in directories:
+		cleanDir(directory)
+
 	try:
 		files = os.listdir(dir)
 		for file in files:
 			os.remove(dir+"\\"+file)
+
 		os.rmdir(dir)
-	except: print("No dir to clean!")
+	except Exception as e: 
+		# print(e)
+		# print(dir)
+		pass
 
 def opendir(directory):
 	# look at all files in directory
@@ -107,6 +118,8 @@ def recursive():
 		print("START:: Working in Directory: " + directory)
 		opendir(directory)
 		print("END:: Working in Directory: " + directory + "\n")
+
+	print ("Conversion Done")
 
 #os.chdir(sys.argv[1])
 #opendir(os.getcwd())
