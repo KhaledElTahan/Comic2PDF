@@ -23,8 +23,8 @@ def olog_info (msg, out=sys.stdout):
     """Print info message to stdout (or any other given output)."""
     print("patool:", msg, file=out)
 
-def handlerar2(filein):
-	tmp_dir = os.getcwd()+"\\Teemp\\"
+def handlerar2(filein, directory):
+	tmp_dir = directory+"\\Teemp\\"
 	os.mkdir(tmp_dir)
 	original = sys.stdout
 	sys.stdout = open("comic2pdf_log.txt","a")
@@ -38,9 +38,9 @@ def handlerar2(filein):
 	sys.stdout = original
 	print("\""+newfile[:-4]+"\" successfully converted!")
 
-def handlezip(filein):
+def handlezip(filein, directory):
 	zip_ref = zipfile.ZipFile(filein, 'r')
-	tmp_dir = os.getcwd()+"\\Teemp\\"
+	tmp_dir = directory+"\\Teemp\\"
 	zip_ref.extractall(tmp_dir)
 	zip_ref.close()
 	newfile = filein.replace(filein[-4:],".pdf")
@@ -93,13 +93,21 @@ def opendir(directory):
 		# file extension cbr only
 		if (file[-4:] == '.cbz' or file[-4:] == '.zip'):
 			# change to zip
-			handlezip(file)
+			handlezip(directory+"\\"+file, directory)
 		elif (file[-4:] == '.cbr' or file[-4:] == '.rar'):
 			# change to rar
-			handlerar2(file)
+			handlerar2(directory+"\\"+file, directory)
 	if failed:
 		print ("WARNING: some items were skipped")
 
+def recursive():
+	directories = [x[0] for x in os.walk(os.getcwd())]
+
+	for directory in directories:
+		print("START:: Working in Directory: " + directory)
+		opendir(directory)
+		print("END:: Working in Directory: " + directory + "\n")
 
 #os.chdir(sys.argv[1])
-opendir(os.getcwd())
+#opendir(os.getcwd())
+recursive()
