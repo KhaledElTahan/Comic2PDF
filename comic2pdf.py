@@ -26,8 +26,13 @@ def olog_info (msg, out=sys.stdout):
     """Print info message to stdout (or any other given output)."""
     print("patool:", msg, file=out)
 
+def trimFileNameSpace(file):
+	new_file = file[:-4].rstrip() + file[-4:]
+	os.rename(file, new_file)
+	return new_file
+
 def handlerar2(filein, directory):
-	tmp_dir = directory+"\\" + "TEMP2PDF" + str(uuid.uuid4()) + "\\"
+	tmp_dir = directory + "\\" + "TEMP2PDF" + str(uuid.uuid4()) + "\\"
 	os.mkdir(tmp_dir)
 	original = sys.stdout
 	sys.stdout = open("comic2pdf_log.txt","a")
@@ -43,7 +48,7 @@ def handlerar2(filein, directory):
 
 def handlezip(filein, directory):
 	zip_ref = zipfile.ZipFile(filein, 'r')
-	tmp_dir = directory+"\\" + "TEMP2PDF" + str(uuid.uuid4()) + "\\"
+	tmp_dir = directory + "\\" + "TEMP2PDF" + str(uuid.uuid4()) + "\\"
 	zip_ref.extractall(tmp_dir)
 	zip_ref.close()
 	newfile = filein.replace(filein[-4:],".pdf")
@@ -102,12 +107,17 @@ def opendir(directory):
 	#print(os.listdir(directory))
 	for file in os.listdir(directory):
 		# file extension cbr only
-		if (file[-4:] == '.cbz' or file[-4:] == '.zip'):
-			# change to zip
-			handlezip(directory+"\\"+file, directory)
-		elif (file[-4:] == '.cbr' or file[-4:] == '.rar'):
-			# change to rar
-			handlerar2(directory+"\\"+file, directory)
+		try:
+			if (file[-4:] == '.cbz'):
+				# change to zip
+				handlezip(trimFileNameSpace(directory+"\\"+file), directory)
+			elif (file[-4:] == '.cbr'):
+				# change to rar
+				handlerar2(trimFileNameSpace(directory+"\\"+file), directory)
+		except Exception as e:
+			print(e)
+			print("FAILED:: " + directory + "\\" + file)
+
 	if failed:
 		print ("WARNING: some items were skipped")
 
