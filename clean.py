@@ -18,14 +18,14 @@ def cleanDir(dir):
 
 def removeFile(file):
 	try:
-		os.remove(file + ".cbr")
-	except:
-		pass
+		if os.path.exists(file + ".cbr"):
+			os.remove(file + ".cbr")
 
-	try:
-		os.remove(file + ".cbz")
-	except:
-		pass
+		if os.path.exists(file + ".cbz"):
+			os.remove(file + ".cbz")
+
+	except Exception as e: 
+		print(e)
 
 
 def recursive():
@@ -51,6 +51,6 @@ def recursive():
 	print ("+E Removing PDF files is done")
 
 	print("Cleanup is Done")
-
+	
 
 recursive()

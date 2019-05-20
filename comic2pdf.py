@@ -39,7 +39,7 @@ def handlerar2(filein, directory):
 	patoolib.util.log_info = nlog_info
 	patoolib.extract_archive(filein, outdir=tmp_dir)
 	newfile = filein.replace(filein[-4:],".pdf")
-	toPDF2(newfile,tmp_dir,7)
+	toPDF2(newfile,tmp_dir, 7)
 	cleanDir(tmp_dir)
 	print("------------------------------------------------------------")
 	
