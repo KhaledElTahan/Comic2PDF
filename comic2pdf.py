@@ -22,16 +22,19 @@ def nlog_info (msg, out=open("comic2pdf_log.txt","a")):
     """Print info message to stdout (or any other given output)."""
     print("patool:", msg, file=out)
 
+
 def olog_info (msg, out=sys.stdout):
     """Print info message to stdout (or any other given output)."""
     print("patool:", msg, file=out)
+
 
 def trimFileNameSpace(file):
 	new_file = file[:-4].rstrip() + file[-4:]
 	os.rename(file, new_file)
 	return new_file
 
-def handlerar2(filein, directory):
+
+def handlerar(filein, directory):
 	tmp_dir = directory + "\\" + "TEMP2PDF" + str(uuid.uuid4()) + "\\"
 	os.mkdir(tmp_dir)
 	original = sys.stdout
@@ -39,12 +42,12 @@ def handlerar2(filein, directory):
 	patoolib.util.log_info = nlog_info
 	patoolib.extract_archive(filein, outdir=tmp_dir)
 	newfile = filein.replace(filein[-4:],".pdf")
-	toPDF2(newfile,tmp_dir, 7)
+	toPDF(newfile,tmp_dir)
 	cleanDir(tmp_dir)
 	print("------------------------------------------------------------")
-	
 	sys.stdout = original
-	print("\""+newfile[:-4]+"\" successfully converted!")
+	print("\""+newfile+"\" successfully converted!")
+
 
 def handlezip(filein, directory):
 	zip_ref = zipfile.ZipFile(filein, 'r')
@@ -52,39 +55,55 @@ def handlezip(filein, directory):
 	zip_ref.extractall(tmp_dir)
 	zip_ref.close()
 	newfile = filein.replace(filein[-4:],".pdf")
-	toPDF2(newfile,tmp_dir,0)
-	try:
-		cleanDir(tmp_dir)
-	except:
-		aaa = 223
-	print("\""+newfile[:-4]+"\" successfully converted!")
+	toPDF(newfile, tmp_dir)
+	cleanDir(tmp_dir)
+	print("\""+newfile+"\" successfully converted!")
 	
-def toPDF2(filename, newdir,ii):
-	ffiles = os.listdir(newdir)
-	if (len(ffiles) == 1):
-		toPDF2(filename,newdir+ffiles[0]+"\\",ii)
-	else:
-		# imagelist is the list with all image filenames
-		im_list = list()
-		firstP = True
-		im = None
-		for image in ffiles:
-			if (image.endswith(".jpg") or image.endswith(".JPG") or image.endswith(".jpeg") or image.endswith(".JPEG")):
-				im1 = Image.open(newdir+image)
-				try:
-					im1.save(newdir+image,dpi=(96,96))
-				except:
-					aaaaa = 4
-				
-				if (firstP):
-					im = im1
-					firstP = False
-				else: im_list.append(im1)
-			else: continue
-		#print(exif)
-		im.save(filename, "PDF" ,resolution=100.0, save_all=True, append_images=im_list)
-		cleanDir(newdir)
-	#print("OK")
+
+def toPDF(filename, newdir):
+	ffiles = getAllImagesPaths(newdir)
+
+	# imagelist is the list with all image filenames
+	im_list = list()
+	firstP = True
+	im = None
+	for image in ffiles:
+		im1 = Image.open(image)
+		im1.load()
+		
+		if (firstP):
+			im = im1
+			firstP = False
+		else: im_list.append(im1)
+
+	im.save(filename, "PDF", resolution=100.0, save_all=True, append_images=im_list)
+	
+	cleanDir(newdir)
+
+
+extensions = [".jpg", ".JPG", ".jpeg", ".JPEG", ".png", ".PNG", ".gif", ".GIF"]
+
+def isImagePath(path):
+	for ext in extensions:
+		if path.endswith(ext):
+			return True
+	
+	return False
+
+
+def getAllImagesPaths(dir):
+	result = []
+
+	directories = [x[0] for x in os.walk(dir)]
+	for directory in directories:
+		ffiles = os.listdir(directory)
+
+		for file in ffiles:
+			if isImagePath(file):
+				result.append(directory+"\\"+file)
+
+	return result
+
 
 def cleanDir(dir):
 	directories = [x[0] for x in os.walk(dir)][1:]
@@ -102,24 +121,19 @@ def cleanDir(dir):
 		# print(dir)
 		pass
 
+
 def opendir(directory):
-	# look at all files in directory
-	#print(os.listdir(directory))
 	for file in os.listdir(directory):
-		# file extension cbr only
 		try:
-			if (file[-4:] == '.cbz'):
-				# change to zip
+			if (file[-4:] == '.cbz' or file[-4:] == '.zip'):
 				handlezip(trimFileNameSpace(directory+"\\"+file), directory)
-			elif (file[-4:] == '.cbr'):
-				# change to rar
-				handlerar2(trimFileNameSpace(directory+"\\"+file), directory)
+			elif (file[-4:] == '.cbr' or file[-4:] == '.rar'):
+				handlerar(trimFileNameSpace(directory+"\\"+file), directory)
 		except Exception as e:
 			print(e)
 			print("FAILED:: " + directory + "\\" + file)
 
-	if failed:
-		print ("WARNING: some items were skipped")
+
 
 def recursive():
 	directories = [x[0] for x in os.walk(os.getcwd())]
@@ -131,6 +145,6 @@ def recursive():
 
 	print ("Conversion Done")
 
-#os.chdir(sys.argv[1])
-#opendir(os.getcwd())
-recursive()
+
+if __name__ == "__main__":	
+	recursive()

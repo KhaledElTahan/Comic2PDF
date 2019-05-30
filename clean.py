@@ -17,12 +17,12 @@ def cleanDir(dir):
 		pass
 
 def removeFile(file):
-	try:
-		if os.path.exists(file + ".cbr"):
-			os.remove(file + ".cbr")
+	extensions = [".cbr", ".rar", ".cbz", ".zip"]
 
-		if os.path.exists(file + ".cbz"):
-			os.remove(file + ".cbz")
+	try:
+		for ext in extensions:
+			if os.path.exists(file + ext):
+				os.remove(file + ext)
 
 	except Exception as e: 
 		print(e)
@@ -42,15 +42,16 @@ def recursive():
 
 
 	directories = [x[0] for x in os.walk(os.getcwd())]
-	print("+S Removing PDF files")
+	print("+S Removing RAR/ZIP/CBR/CBZ files")
 	for directory in directories:
 		files = os.listdir(directory)
 		for file in files:
 			if file[-4:] == '.pdf':
 				removeFile(directory + "\\" + file[:-4])
-	print ("+E Removing PDF files is done")
+	print ("+E Removing RAR/ZIP/CBR/CBZ files is done")
 
 	print("Cleanup is Done")
 	
 
-recursive()
+if __name__ == "__main__":
+	recursive()
