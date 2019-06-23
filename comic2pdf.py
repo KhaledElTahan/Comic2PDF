@@ -124,12 +124,14 @@ def cleanDir(dir):
 
 def opendir(directory):
 	for file in os.listdir(directory):
+		original = sys.stdout
 		try:
 			if (file[-4:] == '.cbz' or file[-4:] == '.zip'):
 				handlezip(trimFileNameSpace(directory+"\\"+file), directory)
 			elif (file[-4:] == '.cbr' or file[-4:] == '.rar'):
 				handlerar(trimFileNameSpace(directory+"\\"+file), directory)
 		except Exception as e:
+			sys.stdout = original
 			print(e)
 			print("FAILED:: " + directory + "\\" + file)
 
