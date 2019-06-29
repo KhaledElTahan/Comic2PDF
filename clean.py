@@ -6,15 +6,21 @@ def cleanDir(dir):
 		cleanDir(directory)
 
 	try:
-		files = os.listdir(dir)
-		for file in files:
-			os.remove(dir+"\\"+file)
+		files = []
 
-		os.rmdir(dir)
+		if os.path.exists(dir):
+			files = os.listdir(dir)
+
+		for file in files:
+			if os.path.exists(dir + "\\" + file):
+				os.remove(dir + "\\" + file)
+
+		if os.path.exists(dir):
+			os.rmdir(dir)
 	except Exception as e: 
-		# print(e)
-		# print(dir)
-		pass
+		print(e)
+		print("Failed to Clean Dir:: " + dir)
+
 
 def removeFile(file):
 	extensions = [".cbr", ".rar", ".cbz", ".zip"]
@@ -22,7 +28,18 @@ def removeFile(file):
 	try:
 		for ext in extensions:
 			if os.path.exists(file + ext):
-				os.remove(file + ext)
+				pdf_file = file + ".pdf"
+				comic_file = file + ext
+
+				pdf_size = os.path.getsize(pdf_file)
+				comic_size = os.path.getsize(comic_file)
+
+				if pdf_size > comic_size * 3 or pdf_size * 3 < comic_size:
+					os.remove(pdf_file)
+				else:
+					os.remove(comic_file)
+
+				break
 
 	except Exception as e: 
 		print(e)
