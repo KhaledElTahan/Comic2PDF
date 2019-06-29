@@ -16,8 +16,6 @@ import PIL.ExifTags
 import uuid
 import time
 
-failed = False
-
 def nlog_info (msg, out=open("comic2pdf_log.txt","a")):
     """Print info message to stdout (or any other given output)."""
     print("patool:", msg, file=out)
@@ -130,8 +128,7 @@ def cleanDir(dir):
 
 		os.rmdir(dir)
 	except Exception as e: 
-		# print(e)
-		# print(dir)
+		print(e + " - Failed to Clean Dir:: " + dir)
 		pass
 
 
