@@ -37,7 +37,17 @@ def file2PDF(filein, directory, type):
 		newfile = filein.replace(filein[-4:], ".pdf")
 		images2PDF(newfile, tmp_dir)
 		cleanDir(tmp_dir)
-		print("\"" + newfile + "\" successfully converted!")
+
+		pdf_size = os.path.getsize(newfile)
+		comic_size = os.path.getsize(filein)
+		
+		if pdf_size > comic_size * 3 or pdf_size * 3 < comic_size:
+			os.remove(newfile)
+			print("Produced file size is unacceptable :: Original {0:.3f} MB => PDF {1:.3f} MB".format(comic_size/(1024.0 * 1024.0), pdf_size/(1024.0 * 1024.0)))
+			print("FAILED:: " + filein)
+		else:
+			print("\"" + newfile + "\" successfully converted!")
+		
 	except Exception as e:
 		cleanDir(tmp_dir)
 		print(e)
@@ -107,7 +117,6 @@ def cleanDir(dir):
 	except Exception as e: 
 		print(e)
 		print("Failed to Clean Dir:: " + dir)
-		pass
 
 
 def trimFileNameSpace(file):
