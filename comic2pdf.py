@@ -16,60 +16,33 @@ import PIL.ExifTags
 import uuid
 import time
 
-def nlog_info (msg, out=open("comic2pdf_log.txt","a")):
-    """Print info message to stdout (or any other given output)."""
-    print("patool:", msg, file=out)
+
+def _dummyOutput(s):
+	pass
 
 
-def olog_info (msg, out=sys.stdout):
-    """Print info message to stdout (or any other given output)."""
-    print("patool:", msg, file=out)
-
-
-def trimFileNameSpace(file):
-	new_file = file[:-4].rstrip() + file[-4:]
-	os.rename(file, new_file)
-	return new_file
-
-
-def RAR2PDF(filein, directory):
+def file2PDF(filein, directory, type):
 	tmp_dir = directory + "\\" + "TEMP2PDF" + str(uuid.uuid4()) + "\\"
-	os.mkdir(tmp_dir)
-	original = sys.stdout
 
 	try:
-		sys.stdout = open("comic2pdf_log.txt","a")
-		patoolib.util.log_info = nlog_info
-		patoolib.extract_archive(filein, outdir=tmp_dir)
+		if type == "RAR":
+			os.mkdir(tmp_dir)
+			patoolib.util.log_info = _dummyOutput
+			patoolib.extract_archive(filein, outdir=tmp_dir)
+		elif type == "ZIP":
+			zip_ref = zipfile.ZipFile(filein, 'r')
+			zip_ref.extractall(tmp_dir)
+			zip_ref.close()
+
 		newfile = filein.replace(filein[-4:],".pdf")
 		imagesToPDF(newfile,tmp_dir)
 		cleanDir(tmp_dir)
-		print("------------------------------------------------------------")
-		sys.stdout = original
 		print("\""+newfile+"\" successfully converted!")
 	except Exception as e:
-		sys.stdout = original
 		cleanDir(tmp_dir)
 		print(e)
 		print("FAILED:: " + filein)
 
-
-def ZIP2PDF(filein, directory):
-	zip_ref = zipfile.ZipFile(filein, 'r')
-	tmp_dir = directory + "\\" + "TEMP2PDF" + str(uuid.uuid4()) + "\\"
-
-	try:
-		zip_ref.extractall(tmp_dir)
-		zip_ref.close()
-		newfile = filein.replace(filein[-4:],".pdf")
-		imagesToPDF(newfile, tmp_dir)
-		cleanDir(tmp_dir)
-		print("\""+newfile+"\" successfully converted!")
-	except Exception as e: 
-		cleanDir(tmp_dir)
-		print(e)
-		print("FAILED:: " + filein)
-	
 
 def imagesToPDF(filename, newdir):
 	ffiles = getAllImagesPaths(newdir)
@@ -88,8 +61,6 @@ def imagesToPDF(filename, newdir):
 		else: im_list.append(im1)
 
 	im.save(filename, "PDF", resolution=100.0, save_all=True, append_images=im_list)
-	
-	cleanDir(newdir)
 
 
 extensions = [".jpg", ".JPG", ".jpeg", ".JPEG", ".png", ".PNG", ".gif", ".GIF"]
@@ -124,20 +95,29 @@ def cleanDir(dir):
 	try:
 		files = os.listdir(dir)
 		for file in files:
-			os.remove(dir+"\\"+file)
+			if os.path.exists(dir+"\\"+file):
+				os.remove(dir+"\\"+file)
 
-		os.rmdir(dir)
+		if os.path.exists(dir):
+			os.rmdir(dir)
 	except Exception as e: 
-		print(e + " - Failed to Clean Dir:: " + dir)
+		print(e)
+		print("Failed to Clean Dir:: " + dir)
 		pass
+
+
+def trimFileNameSpace(file):
+	new_file = file[:-4].rstrip() + file[-4:]
+	os.rename(file, new_file)
+	return new_file
 
 
 def opendir(directory):
 	for file in os.listdir(directory):
 		if (file[-4:] == '.cbz' or file[-4:] == '.zip'):
-			ZIP2PDF(trimFileNameSpace(directory+"\\"+file), directory)
+			file2PDF(trimFileNameSpace(directory+"\\"+file), directory, "ZIP")
 		elif (file[-4:] == '.cbr' or file[-4:] == '.rar'):
-			RAR2PDF(trimFileNameSpace(directory+"\\"+file), directory)
+			file2PDF(trimFileNameSpace(directory+"\\"+file), directory, "RAR")
 
 
 def recursive():
