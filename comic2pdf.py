@@ -93,7 +93,11 @@ def cleanDir(dir):
 		cleanDir(directory)
 
 	try:
-		files = os.listdir(dir)
+		files = []
+
+		if os.path.exists(dir):
+			files = os.listdir(dir)
+
 		for file in files:
 			if os.path.exists(dir+"\\"+file):
 				os.remove(dir+"\\"+file)
