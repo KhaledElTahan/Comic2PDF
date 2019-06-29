@@ -34,17 +34,17 @@ def file2PDF(filein, directory, type):
 			zip_ref.extractall(tmp_dir)
 			zip_ref.close()
 
-		newfile = filein.replace(filein[-4:],".pdf")
-		imagesToPDF(newfile,tmp_dir)
+		newfile = filein.replace(filein[-4:], ".pdf")
+		images2PDF(newfile, tmp_dir)
 		cleanDir(tmp_dir)
-		print("\""+newfile+"\" successfully converted!")
+		print("\"" + newfile + "\" successfully converted!")
 	except Exception as e:
 		cleanDir(tmp_dir)
 		print(e)
 		print("FAILED:: " + filein)
 
 
-def imagesToPDF(filename, newdir):
+def images2PDF(filename, newdir):
 	ffiles = getAllImagesPaths(newdir)
 
 	# imagelist is the list with all image filenames
@@ -82,7 +82,7 @@ def getAllImagesPaths(dir):
 
 		for file in ffiles:
 			if isImagePath(file):
-				result.append(directory+"\\"+file)
+				result.append(directory + "\\" + file)
 
 	return result
 
@@ -99,8 +99,8 @@ def cleanDir(dir):
 			files = os.listdir(dir)
 
 		for file in files:
-			if os.path.exists(dir+"\\"+file):
-				os.remove(dir+"\\"+file)
+			if os.path.exists(dir + "\\" + file):
+				os.remove(dir + "\\" + file)
 
 		if os.path.exists(dir):
 			os.rmdir(dir)
@@ -119,9 +119,9 @@ def trimFileNameSpace(file):
 def opendir(directory):
 	for file in os.listdir(directory):
 		if (file[-4:] == '.cbz' or file[-4:] == '.zip'):
-			file2PDF(trimFileNameSpace(directory+"\\"+file), directory, "ZIP")
+			file2PDF(trimFileNameSpace(directory + "\\" + file), directory, "ZIP")
 		elif (file[-4:] == '.cbr' or file[-4:] == '.rar'):
-			file2PDF(trimFileNameSpace(directory+"\\"+file), directory, "RAR")
+			file2PDF(trimFileNameSpace(directory + "\\" + file), directory, "RAR")
 
 
 def recursive():
