@@ -34,33 +34,46 @@ def trimFileNameSpace(file):
 	return new_file
 
 
-def handlerar(filein, directory):
+def RAR2PDF(filein, directory):
 	tmp_dir = directory + "\\" + "TEMP2PDF" + str(uuid.uuid4()) + "\\"
 	os.mkdir(tmp_dir)
 	original = sys.stdout
-	sys.stdout = open("comic2pdf_log.txt","a")
-	patoolib.util.log_info = nlog_info
-	patoolib.extract_archive(filein, outdir=tmp_dir)
-	newfile = filein.replace(filein[-4:],".pdf")
-	toPDF(newfile,tmp_dir)
-	cleanDir(tmp_dir)
-	print("------------------------------------------------------------")
-	sys.stdout = original
-	print("\""+newfile+"\" successfully converted!")
+
+	try:
+		sys.stdout = open("comic2pdf_log.txt","a")
+		patoolib.util.log_info = nlog_info
+		patoolib.extract_archive(filein, outdir=tmp_dir)
+		newfile = filein.replace(filein[-4:],".pdf")
+		imagesToPDF(newfile,tmp_dir)
+		cleanDir(tmp_dir)
+		print("------------------------------------------------------------")
+		sys.stdout = original
+		print("\""+newfile+"\" successfully converted!")
+	except Exception as e:
+		sys.stdout = original
+		cleanDir(tmp_dir)
+		print(e)
+		print("FAILED:: " + filein)
 
 
-def handlezip(filein, directory):
+def ZIP2PDF(filein, directory):
 	zip_ref = zipfile.ZipFile(filein, 'r')
 	tmp_dir = directory + "\\" + "TEMP2PDF" + str(uuid.uuid4()) + "\\"
-	zip_ref.extractall(tmp_dir)
-	zip_ref.close()
-	newfile = filein.replace(filein[-4:],".pdf")
-	toPDF(newfile, tmp_dir)
-	cleanDir(tmp_dir)
-	print("\""+newfile+"\" successfully converted!")
+
+	try:
+		zip_ref.extractall(tmp_dir)
+		zip_ref.close()
+		newfile = filein.replace(filein[-4:],".pdf")
+		imagesToPDF(newfile, tmp_dir)
+		cleanDir(tmp_dir)
+		print("\""+newfile+"\" successfully converted!")
+	except Exception as e: 
+		cleanDir(tmp_dir)
+		print(e)
+		print("FAILED:: " + filein)
 	
 
-def toPDF(filename, newdir):
+def imagesToPDF(filename, newdir):
 	ffiles = getAllImagesPaths(newdir)
 
 	# imagelist is the list with all image filenames
@@ -124,17 +137,10 @@ def cleanDir(dir):
 
 def opendir(directory):
 	for file in os.listdir(directory):
-		original = sys.stdout
-		try:
-			if (file[-4:] == '.cbz' or file[-4:] == '.zip'):
-				handlezip(trimFileNameSpace(directory+"\\"+file), directory)
-			elif (file[-4:] == '.cbr' or file[-4:] == '.rar'):
-				handlerar(trimFileNameSpace(directory+"\\"+file), directory)
-		except Exception as e:
-			sys.stdout = original
-			print(e)
-			print("FAILED:: " + directory + "\\" + file)
-
+		if (file[-4:] == '.cbz' or file[-4:] == '.zip'):
+			ZIP2PDF(trimFileNameSpace(directory+"\\"+file), directory)
+		elif (file[-4:] == '.cbr' or file[-4:] == '.rar'):
+			RAR2PDF(trimFileNameSpace(directory+"\\"+file), directory)
 
 
 def recursive():
