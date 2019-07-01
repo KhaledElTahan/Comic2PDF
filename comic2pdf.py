@@ -10,20 +10,24 @@
 # License:  You can do what you want with it.
 # Mainly based on a script by Bransorem (https://github.com/bransorem/comic2pdf) 
 
-import os, sys, zipfile, patoolib, stat
+import os, sys, zipfile, patoolib
 from PIL import Image
 import PIL.ExifTags
 import uuid
 import time
+from colorama import init, Fore, Back, Style
 
+init()
 
 def _dummyOutput(s):
 	pass
 
 
 def file2PDF(filein, directory, type):
-	tmp_dir = directory + "\\" + "TEMP2PDF" + str(uuid.uuid4()) + "\\"
+	print("* " + filein, end=" ")
 
+	tmp_dir = directory + "\\" + "TEMP2PDF" + str(uuid.uuid4()) + "\\"
+	
 	try:
 		if type == "RAR":
 			os.mkdir(tmp_dir)
@@ -43,15 +47,17 @@ def file2PDF(filein, directory, type):
 		
 		if pdf_size > comic_size * 3 or pdf_size * 3 < comic_size:
 			os.remove(newfile)
+			print(Fore.RED + "FAILURE")
 			print("Produced file size is unacceptable :: Original {0:.3f} MB => PDF {1:.3f} MB".format(comic_size/(1024.0 * 1024.0), pdf_size/(1024.0 * 1024.0)))
-			print("FAILED:: " + filein)
+			print(Style.RESET_ALL)
 		else:
-			print("\"" + newfile + "\" successfully converted!")
+			print(Fore.GREEN + "SUCCESS" + Style.RESET_ALL)
 		
 	except Exception as e:
 		cleanDir(tmp_dir)
+		print(Fore.RED + "FAILURE")
 		print(e)
-		print("FAILED:: " + filein)
+		print(Style.RESET_ALL, end="")
 
 
 def images2PDF(filename, newdir):
@@ -115,8 +121,7 @@ def cleanDir(dir):
 		if os.path.exists(dir):
 			os.rmdir(dir)
 	except Exception as e: 
-		print(e)
-		print("Failed to Clean Dir:: " + dir)
+		pass
 
 
 def trimFileNameSpace(file):
