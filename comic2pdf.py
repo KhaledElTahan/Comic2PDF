@@ -29,6 +29,10 @@ def file2PDF(filein, directory, type):
 	tmp_dir = directory + "\\" + "TEMP2PDF" + str(uuid.uuid4()) + "\\"
 	
 	try:
+		comic_size = os.path.getsize(filein)
+
+		print("{0:.3f} MB".format(comic_size/(1024.0 * 1024.0)), end=" ")
+
 		if type == "RAR":
 			os.mkdir(tmp_dir)
 			patoolib.util.log_info = _dummyOutput
@@ -43,13 +47,12 @@ def file2PDF(filein, directory, type):
 		cleanDir(tmp_dir)
 
 		pdf_size = os.path.getsize(newfile)
-		comic_size = os.path.getsize(filein)
 		
 		if pdf_size > comic_size * 3 or pdf_size * 3 < comic_size:
 			os.remove(newfile)
 			print(Fore.RED + "FAILURE")
 			print("Produced file size is unacceptable :: Original {0:.3f} MB => PDF {1:.3f} MB".format(comic_size/(1024.0 * 1024.0), pdf_size/(1024.0 * 1024.0)))
-			print(Style.RESET_ALL)
+			print(Style.RESET_ALL, end="")
 		else:
 			print(Fore.GREEN + "SUCCESS" + Style.RESET_ALL)
 		
