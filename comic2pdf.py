@@ -15,6 +15,7 @@ from PIL import Image
 import PIL.ExifTags
 import uuid
 import time
+import gc
 from colorama import init, Fore, Back, Style
 
 init()
@@ -137,8 +138,10 @@ def opendir(directory):
 	for file in os.listdir(directory):
 		if (file[-4:] == '.cbz' or file[-4:] == '.zip'):
 			file2PDF(trimFileNameSpace(directory + "\\" + file), directory, "ZIP")
+			gc.collect()
 		elif (file[-4:] == '.cbr' or file[-4:] == '.rar'):
 			file2PDF(trimFileNameSpace(directory + "\\" + file), directory, "RAR")
+			gc.collect()
 
 
 def recursive():
