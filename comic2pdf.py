@@ -22,20 +22,27 @@ import sys
 write = sys.stdout.write
 init()
 
+totalComicsNumber = None
+currentComicNumber = 0
+
 def _dummyOutput(s):
 	pass
 
 
 def file2PDF(filein, directory, type):
-	print("* " + filein, end=" ")
+	global currentComicNumber, totalComicsNumber
+	currentComicNumber = currentComicNumber + 1
+
+
+	print("* [{0}/{1}] ".format(currentComicNumber, totalComicsNumber) + filein, end=" ")
 
 	tmp_dir = directory + "\\" + "TEMP2PDF" + str(uuid.uuid4()) + "\\"
 	newfile = None 
-	
+
 	try:
 		comic_size = os.path.getsize(filein)
 
-		print("{0:.3f} MB - Extracting ".format(comic_size/(1024.0 * 1024.0)), end=" ")
+		print("{0:.3f} MB - Extracting".format(comic_size/(1024.0 * 1024.0)), end=" ")
 
 		if type == "RAR":
 			os.mkdir(tmp_dir)
@@ -162,10 +169,25 @@ def opendir(directory):
 			file2PDF(trimFileNameSpace(directory + "\\" + file), directory, "RAR")
 			gc.collect()
 
-
-def recursive():
+def countComics():
 	directories = [x[0] for x in os.walk(os.getcwd())]
 
+	cnt = 0
+
+	for directory in directories:
+		for file in os.listdir(directory):
+			if (file[-4:] == '.cbz' or file[-4:] == '.zip' or file[-4:] == '.cbr' or file[-4:] == '.rar'):
+				cnt = cnt + 1
+
+	return cnt
+
+
+def recursive():
+	global totalComicsNumber
+	totalComicsNumber = countComics()
+
+	directories = [x[0] for x in os.walk(os.getcwd())]
+	
 	for directory in directories:
 		print("START:: Working in Directory: " + directory)
 		opendir(directory)
