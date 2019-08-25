@@ -28,6 +28,7 @@ def file2PDF(filein, directory, type):
 	print("* " + filein, end=" ")
 
 	tmp_dir = directory + "\\" + "TEMP2PDF" + str(uuid.uuid4()) + "\\"
+	newfile = None 
 	
 	try:
 		comic_size = os.path.getsize(filein)
@@ -59,6 +60,9 @@ def file2PDF(filein, directory, type):
 		
 	except Exception as e:
 		cleanDir(tmp_dir)
+		if newfile is not None and os.path.exists(newfile):
+			os.remove(newfile)
+			
 		print(Fore.RED + "FAILURE")
 		print(e)
 		print(Style.RESET_ALL, end="")
