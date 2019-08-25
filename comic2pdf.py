@@ -17,7 +17,9 @@ import uuid
 import time
 import gc
 from colorama import init, Fore, Back, Style
+import sys
 
+write = sys.stdout.write
 init()
 
 def _dummyOutput(s):
@@ -33,7 +35,7 @@ def file2PDF(filein, directory, type):
 	try:
 		comic_size = os.path.getsize(filein)
 
-		print("{0:.3f} MB".format(comic_size/(1024.0 * 1024.0)), end=" ")
+		print("{0:.3f} MB - Extracting ".format(comic_size/(1024.0 * 1024.0)), end=" ")
 
 		if type == "RAR":
 			os.mkdir(tmp_dir)
@@ -75,6 +77,12 @@ def images2PDF(filename, newdir):
 	im_list = list()
 	firstP = True
 	im = None
+
+	length = len(ffiles)
+	cnt = 1
+
+	print("- Processing 000.00%", end=" ")
+
 	for image in ffiles:
 		im1 = Image.open(image)
 		im1.load()
@@ -83,6 +91,13 @@ def images2PDF(filename, newdir):
 			im = im1
 			firstP = False
 		else: im_list.append(im1)
+
+		write("\b" * 8)
+		print("{0:.2f}%".format(cnt * 100.0 / length).zfill(7), end=" ")
+
+		cnt = cnt + 1
+
+	print("- Saving", end=" ")
 
 	im.save(filename, "PDF", resolution=100.0, save_all=True, append_images=im_list)
 
